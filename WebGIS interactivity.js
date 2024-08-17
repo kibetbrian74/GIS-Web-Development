@@ -1,10 +1,48 @@
-const map = L.map('map').setView([-33.1382707510116, 23.036718256556785], 8);
+// Maps have base layers and overlays, base layers can only be displayed one at a time, 
+// several overlays can be displayed at once
+
+//Adding base layers
+var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '<a href = "https://www.openstreetmap.org/#map=6/0.172/37.904"><span>© OpenStreetMap</span></a>'});
+var osmHOT = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap contributors, Tiles style by Humanitarian OpenStreetMap Team hosted by OpenStreetMap France'});
+
+// Creating overlays (Cities in Kenya), they will use the default place markers
+var Nairobi = L.marker([-1.2694692527947553, 36.81543191159011]).bindPopup('Nairobi').openPopup(),
+    Nakuru = L.marker([-0.290380171348218, 36.07265580549653]).bindPopup('Nakuru').openPopup(),
+    Eldoret = L.marker([0.5173140507525549, 35.26908796512853]).bindPopup('Eldoret').openPopup(),
+    Kisumu = L.marker([-0.09527776082946149, 34.76327864499911]).bindPopup('Kisumu').openPopup(),
+    Mombasa = L.marker([-4.053793137558236, 39.66665459984013]).bindPopup('Mombasa').openPopup();
+
+// Instead of adding them individually, you can add as a layer group (cities)
+var cities = L.layerGroup([Nairobi, Nakuru, Eldoret, Kisumu, Mombasa]);
+
 //Sets default map center parameters and zoom level
+var map = L.map('map', {
+    center: [0.47848757692157173, 37.532745416165376],
+    zoom: 6,
+    layers: [osm, osmHOT, cities]
+});
 
-const OpenStreetURL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-const OpenStreetAttribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+var baseMaps = {
+    "OpenStreetMap": osm,
+    "OpenStreetMap Hot": osmHOT
+};
+var overlayMaps = {
+    "Cities": cities
+};
 
-const OpenStreetMap = L.tileLayer(OpenStreetURL,{OpenStreetAttribution}).addTo(map)
+// Now that we have set base layers and overlays, we have to add them to the map
+var layerControls = L.control.layers(baseMaps, overlayMaps).addTo(map);
+
+// you can add isolated base layers and overlays by;
+var openTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: 'Map data: © OpenStreetMap contributors, SRTM | Map style: © OpenTopoMap (CC-BY-SA)'
+});
+layerControls.addBaseLayer(openTopoMap, "OpenTopoMap")
 
 // Adding a circle to the map
 const circleLayer = L.circle([-33.1382707510116, 23.036718256556785],
@@ -35,3 +73,23 @@ const linelatlon = [[-33.33149906042967,22.1526824741364],
         [-33.07410461480728,22.6690398960114],
         [-33.184509175083,23.1194793491364]]
 const polylinL = L.polyline(linelatlon, {color:'red', opacity: 0.6}).addTo(map)
+
+// Adding a marker with a defaul icon to the map
+const marker1 = L.marker([-33.9753682676208, 22.48586430216176])
+marker1.bindPopup("<h3>Name: George City</h3><h3>Country: South Africa</h3>")
+marker1.addTo(map)
+
+//Adding a marker with custom icon, google search 'location marker icons transparent background'
+        //then click an icon and right click to opne image in new tab. The copy it link
+const icon1 = L.icon({
+    iconUrl:'https://png.pngtree.com/png-vector/20211103/ourmid/pngtree-pin-map-location-icon-png-png-image_4020850.png',
+    iconSize: [20,30]
+})
+const marker2 = L.marker([-34.180367742764275, 22.095218266555595], {
+        icon: icon1})
+marker2.bindPopup("<h3>Location: Mossel Bay</h3><h3>Country: South Africa</h3>")
+        .openPopup();
+marker2.addTo(map)
+
+//Adding a message popup when the cursor hovers over the marker
+marker1.bindTooltip("<h4>Click me</h4>")
